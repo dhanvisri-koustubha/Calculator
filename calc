@@ -1,0 +1,90 @@
+// MainActivity.kt
+
+import androidx.appcompat.app.AppCompatActivity
+import android.os.Bundle
+import android.view.View
+import android.widget.Button
+import android.widget.Toast
+import kotlinx.android.synthetic.main.activity_main.*
+
+class MainActivity : AppCompatActivity() {
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.activity_main)
+
+        // Set OnClickListener for digit buttons
+        val digitButtons = listOf<Button>(btn0, btn1, btn2, btn3, btn4, btn5, btn6, btn7, btn8, btn9)
+        for (button in digitButtons) {
+            button.setOnClickListener { onDigitClick(button.text.toString()) }
+        }
+
+        // Set OnClickListener for arithmetic operation buttons
+        btnAdd.setOnClickListener { onOperatorClick("+") }
+        btnSubtract.setOnClickListener { onOperatorClick("-") }
+        btnMultiply.setOnClickListener { onOperatorClick("*") }
+        btnDivide.setOnClickListener { onOperatorClick("/") }
+
+        // Set OnClickListener for clear button
+        btnClear.setOnClickListener { clearInput() }
+
+        // Set OnClickListener for equals button
+        btnEquals.setOnClickListener { calculateResult() }
+    }
+
+    private fun onDigitClick(digit: String) {
+        // Append clicked digit to input text
+        inputText.append(digit)
+    }
+
+    private fun onOperatorClick(operator: String) {
+        // Append operator to input text
+        inputText.append(" $operator ")
+    }
+
+    private fun clearInput() {
+        // Clear input text
+        inputText.text.clear()
+    }
+
+    private fun calculateResult() {
+        val input = inputText.text.toString().trim()
+
+        try {
+            // Evaluate the expression and display the result
+            val result = evaluateExpression(input)
+            inputText.text.clear()
+            inputText.append(result.toString())
+        } catch (e: ArithmeticException) {
+            // Handle division by zero error
+            Toast.makeText(this, "Error: Division by zero", Toast.LENGTH_SHORT).show()
+            clearInput()
+        } catch (e: Exception) {
+            // Handle other errors (e.g., invalid expression)
+            Toast.makeText(this, "Error: Invalid expression", Toast.LENGTH_SHORT).show()
+            clearInput()
+        }
+    }
+
+    private fun evaluateExpression(expression: String): Double {
+        // Split the expression into operands and operator
+        val parts = expression.split(" ")
+        val operand1 = parts[0].toDouble()
+        val operator = parts[1]
+        val operand2 = parts[2].toDouble()
+
+        // Perform arithmetic operation based on operator
+        return when (operator) {
+            "+" -> operand1 + operand2
+            "-" -> operand1 - operand2
+            "*" -> operand1 * operand2
+            "/" -> {
+                if (operand2 == 0.0) {
+                    throw ArithmeticException()
+                }
+                operand1 / operand2
+            }
+            else -> throw IllegalArgumentException()
+        }
+    }
+}
